@@ -39,6 +39,7 @@
 
   var elFiltro = document.getElementById('filtro-cat');
   var elListaRest = document.getElementById('lista-restaurantes');
+  var elRestVacio = document.getElementById('rest-vacio');
   var elStepRest = document.getElementById('step-restaurante');
   var elStepProd = document.getElementById('step-productos');
   var elStepRes = document.getElementById('step-resumen');
@@ -49,6 +50,17 @@
   var elResumenVacio = document.getElementById('resumen-vacio');
   var elTotal = document.getElementById('total-delivery');
   var elMsgConfirm = document.getElementById('msg-confirm');
+  var elConfirmSubtotal = document.getElementById('confirm-subtotal');
+  var elConfirmFee = document.getElementById('confirm-fee');
+  var elConfirmTax = document.getElementById('confirm-tax');
+  var elConfirmTotal = document.getElementById('confirm-total');
+  var elCarritoCount = document.getElementById('carrito-count');
+  var elModalCambioRest = document.getElementById('modal-cambio-rest');
+  var elModalCancel = document.getElementById('modal-cancel');
+  var elModalConfirm = document.getElementById('modal-confirm');
+  var elBtnCancelar = document.getElementById('btn-cancelar');
+  var pendingRestId = null;
+  var STAGGER_ITEM_SELECTOR = ':scope > li';
 
   function mostrarSoloPanel(panel) {
     var panels = [elStepRest, elStepProd, elStepRes, elStepConf];
@@ -79,6 +91,7 @@
   function filtrarRestaurantes() {
     var cat = elFiltro.value;
     elListaRest.innerHTML = '';
+    var count = 0;
     for (var i = 0; i < RESTAURANTES.length; i++) {
       var r = RESTAURANTES[i];
       if (cat !== 'todas' && r.categoria !== cat) continue;
@@ -98,7 +111,10 @@
         '</span></span>';
       li.appendChild(btn);
       elListaRest.appendChild(li);
+      count += 1;
     }
+    if (elRestVacio) elRestVacio.hidden = count !== 0;
+    retriggerStagger(elListaRest);
   }
 
   function escapeHtml(s) {
@@ -144,6 +160,7 @@
         '">+</button>';
       elListaPlatos.appendChild(li);
     }
+    retriggerStagger(elListaPlatos);
     mostrarSoloPanel(elStepProd);
   }
 
@@ -171,6 +188,33 @@
         img: img
       });
     }
+    actualizarCarritoCount();
+  }
+
+  function eliminarPlato(idPlato) {
+    for (var i = 0; i < pedido.length; i++) {
+      if (pedido[i].idPlato === idPlato) {
+        pedido.splice(i, 1);
+        break;
+      }
+    }
+    actualizarCarritoCount();
+  }
+
+  function ajustarCantidad(idPlato, delta) {
+    var linea = lineaPedido(idPlato);
+    if (!linea) return;
+    linea.cantidad += delta;
+    if (linea.cantidad <= 0) {
+      eliminarPlato(idPlato);
+      return;
+    }
+    actualizarCarritoCount();
+  }
+
+  function limpiarPedido() {
+    pedido = [];
+    actualizarCarritoCount();
   }
 
   function totalPedido() {
@@ -183,6 +227,16 @@
 
   function formatEuros(n) {
     return Number(n).toFixed(2).replace('.', ',') + ' €';
+  }
+
+  function costoEnvio(subtotal) {
+    if (subtotal <= 0) return 0;
+    return 2.5;
+  }
+
+  function impuesto(subtotal) {
+    if (subtotal <= 0) return 0;
+    return subtotal * 0.08;
   }
 
   function pintarResumen() {
@@ -200,22 +254,70 @@
         '<img class="resumen-thumb" src="' +
         l.img +
         '" width="40" height="40" alt="">' +
+        '<div class="resumen-info">' +
         '<span class="resumen-nombre">' +
         escapeHtml(l.nombre) +
-        ' × ' +
+        '</span>' +
+        '<div class="resumen-controls">' +
+        '<button type="button" class="qty-btn" data-qty="dec" data-line-id="' +
+        escapeAttr(l.idPlato) +
+        '" aria-label="Restar">-</button>' +
+        '<span class="resumen-cantidad">' +
         l.cantidad +
-        '</span><span class="resumen-precio">' +
+        '</span>' +
+        '<button type="button" class="qty-btn" data-qty="inc" data-line-id="' +
+        escapeAttr(l.idPlato) +
+        '" aria-label="Sumar">+</button>' +
+        '<button type="button" class="remove-btn" data-remove-line="' +
+        escapeAttr(l.idPlato) +
+        '">Quitar</button>' +
+        '</div>' +
+        '</div>' +
+        '<span class="resumen-precio">' +
         formatEuros(l.precioUnit * l.cantidad) +
         '</span>';
       elListaResumen.appendChild(li);
     }
     elTotal.textContent = formatEuros(totalPedido());
+    actualizarCarritoCount();
+    retriggerStagger(elListaResumen);
+  }
+
+  function retriggerStagger(listEl) {
+    if (!listEl) return;
+    var items = listEl.querySelectorAll(STAGGER_ITEM_SELECTOR);
+    for (var i = 0; i < items.length; i++) {
+      items[i].style.removeProperty('animation-delay');
+      items[i].offsetHeight;
+    }
+    listEl.classList.remove('stagger-animate');
+    listEl.offsetHeight;
+    listEl.classList.add('stagger-animate');
+  }
+
+  function totalItemsPedido() {
+    var c = 0;
+    for (var i = 0; i < pedido.length; i++) {
+      c += pedido[i].cantidad;
+    }
+    return c;
+  }
+
+  function actualizarCarritoCount() {
+    if (!elCarritoCount) return;
+    elCarritoCount.textContent = String(totalItemsPedido());
   }
 
   elListaRest.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-rest]');
     if (!btn) return;
-    abrirMenu(btn.getAttribute('data-rest'));
+    var restId = btn.getAttribute('data-rest');
+    if (restauranteActual && restId !== restauranteActual && pedido.length > 0) {
+      pendingRestId = restId;
+      if (elModalCambioRest) elModalCambioRest.hidden = false;
+      return;
+    }
+    abrirMenu(restId);
   });
 
   elFiltro.addEventListener('change', filtrarRestaurantes);
@@ -228,6 +330,21 @@
     var precio = parseFloat(b.getAttribute('data-precio'), 10);
     var imgPlato = b.getAttribute('data-img') || '';
     agregarPlato(id, nombre, precio, imgPlato);
+  });
+
+  elListaResumen.addEventListener('click', function (e) {
+    var btnQty = e.target.closest('[data-qty]');
+    if (btnQty) {
+      var idQty = btnQty.getAttribute('data-line-id');
+      var dir = btnQty.getAttribute('data-qty');
+      ajustarCantidad(idQty, dir === 'inc' ? 1 : -1);
+      pintarResumen();
+      return;
+    }
+    var btnRemove = e.target.closest('[data-remove-line]');
+    if (!btnRemove) return;
+    eliminarPlato(btnRemove.getAttribute('data-remove-line'));
+    pintarResumen();
   });
 
   document.getElementById('btn-volver-rest').addEventListener('click', function () {
@@ -244,11 +361,24 @@
     else mostrarSoloPanel(elStepRest);
   });
 
+  if (elBtnCancelar) {
+    elBtnCancelar.addEventListener('click', function () {
+      limpiarPedido();
+      pintarResumen();
+      restauranteActual = null;
+      mostrarSoloPanel(elStepRest);
+    });
+  }
+
   document.getElementById('btn-comprar').addEventListener('click', function () {
     if (pedido.length === 0) {
       alert('Añada al menos un plato antes de confirmar.');
       return;
     }
+    var subtotal = totalPedido();
+    var fee = costoEnvio(subtotal);
+    var tax = impuesto(subtotal);
+    var total = subtotal + fee + tax;
     var nombreRest = '';
     for (var i = 0; i < RESTAURANTES.length; i++) {
       if (RESTAURANTES[i].id === restauranteActual) {
@@ -260,17 +390,50 @@
       'Su pedido en ' +
       nombreRest +
       ' por ' +
-      formatEuros(totalPedido()) +
+      formatEuros(total) +
       ' está en preparación. Tiempo aproximado: 35 minutos.';
-    pedido = [];
+    if (elConfirmSubtotal) elConfirmSubtotal.textContent = formatEuros(subtotal);
+    if (elConfirmFee) elConfirmFee.textContent = formatEuros(fee);
+    if (elConfirmTax) elConfirmTax.textContent = formatEuros(tax);
+    if (elConfirmTotal) elConfirmTotal.textContent = formatEuros(total);
+    limpiarPedido();
     pintarResumen();
     mostrarSoloPanel(elStepConf);
   });
 
   document.getElementById('btn-nuevo').addEventListener('click', function () {
     restauranteActual = null;
+    actualizarCarritoCount();
     mostrarSoloPanel(elStepRest);
   });
 
+  if (elModalCambioRest) {
+    elModalCambioRest.addEventListener('click', function (e) {
+      if (e.target && e.target.getAttribute('data-close') === 'true') {
+        elModalCambioRest.hidden = true;
+        pendingRestId = null;
+      }
+    });
+  }
+
+  if (elModalCancel) {
+    elModalCancel.addEventListener('click', function () {
+      if (elModalCambioRest) elModalCambioRest.hidden = true;
+      pendingRestId = null;
+    });
+  }
+
+  if (elModalConfirm) {
+    elModalConfirm.addEventListener('click', function () {
+      if (!pendingRestId) return;
+      limpiarPedido();
+      pintarResumen();
+      if (elModalCambioRest) elModalCambioRest.hidden = true;
+      abrirMenu(pendingRestId);
+      pendingRestId = null;
+    });
+  }
+
   filtrarRestaurantes();
+  actualizarCarritoCount();
 })();

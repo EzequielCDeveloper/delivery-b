@@ -1,0 +1,119 @@
+# Análisis UI/UX Integral - Metodología de Ejecución
+## FASE 1: EXPLORACIÓN Y ANÁLISIS INICIAL
+### 1.1 Exploración del Proyecto
+- Identificar la tecnología usada (React, Vue, Angular, Vanilla JS, etc.)
+- Mapear estructura de directorios y archivos
+- Identificar archivos principales (componentes, estilos, lógica)
+- Detectar configuración del proyecto (package.json, vite.config, tailwind.config, etc.)
+- Identificar librerías UI usadas (Bootstrap, Material UI, Tailwind, etc.)
+### 1.2 Lectura Integral
+Leer y analizar TODOS los archivos relevantes:
+- Páginas principales (index.html, App.jsx, pages/, etc.)
+- Archivos de estilos (styles.css, App.css, styles/, etc.)
+- Componentes de UI
+- Archivos de configuración
+## FASE 2: ANÁLISIS UI/UX ITERATIVO
+### Iteración 1: Diseño Visual y Layout
+Evaluar:
+- Consistencia visual (colores, tipografía, espaciado)
+- Jerarquía visual y contraste
+- Uso del espacio en blanco
+- Responsive design y mobile-first
+- Iconografía y imágenes
+- Animaciones y transiciones
+- Estados hover/active/focus
+### Iteración 2: Interacción y Experiencia de Usuario
+Evaluar:
+- Flujo de navegación
+- Retroalimentación visual (feedbacks)
+- Accesibilidad de acciones principales
+- Claridad de etiquetas y textos
+- Flujo de formularios
+- Manejo de cargas y estados vacío
+- Claridad del proceso de checkout/pago (si aplica)
+### Iteración 3: Accesibilidad y Técnicos
+Evaluar:
+- Contraste de colores (WCAG AA)
+- Labels y aria-labels
+- Navegación por teclado
+- Focus states
+- Imágenes con alt text
+- Semántica HTML
+- Validación de formularios
+- Manejo de errores
+- Responsive en todos los breakpoints
+### Iteración 4: Edge Cases y Casos Fronterizos
+Evaluar:
+- Contenido muy largo/corto
+- Imágenes que no cargan
+- Estados de carga
+- Conexiones lentas
+- JavaScript deshabilitado
+- Navegación directa por URL (deep linking)
+- Persistencia de estado
+## FASE 3: CATALOGACIÓN DE PROBLEMAS
+### Crear Plan de Acción Numerado
+Para cada problema identificado:
+1. Número secuencial
+2. Descripción clara del problema
+3. Severidad (Alta/Media/Baja)
+4. Archivo(s) afectado(s)
+5. Tipo (Visual/Interacción/Accesibilidad/Técnico)
+6. Prioridad de corrección
+## FASE 4: IMPLEMENTACIÓN
+### 4.1 Correcciones de Diseño Visual
+- Mejorar jerarquía visual
+- Actualizar estilos CSS/modernizar
+- Agregar/transicionar animaciones
+- Mejorar sistema de spacing
+- Actualizar tipografía
+### 4.2 Mejoras de Interacción
+- Agregar feedback visual (toasts, loaders)
+- Mejorar flujos de navegación
+- Agregar estados vacío (empty states)
+- Mejorar labels confusos
+- Optimizar botones CTAs
+### 4.3 Correcciones de Accesibilidad
+- Agregar aria-labels faltantes
+- Mejorar contraste
+- Implementar focus management
+- Agregar skip links
+- Mejorar semántica HTML
+### 4.4 Mejoras Funcionales
+- Agregar validación
+- Manejar edge cases
+- Agregar fallbacks
+- Implementar navegación por hash
+### 4.5 Rediseño Moderno (si se solicita)
+- Mantener paleta de colores original
+- Agregar gradientes sutiles
+- Implementar sombras suaves
+- Usar border-radius consistentes
+- Agregar animaciones fluidas
+- Expandir paleta de colores si es necesario
+- Usar CSS variables para consistencia
+## FASE 5: TESTING Y VERIFICACIÓN
+### 5.1 Validación de Código
+- Verificar sintaxis JS (node --check)
+- Verificar estructura HTML
+- Verificar CSS (balance de selectores)
+### 5.2 Pruebas Funcionales
+- Testing de cada feature implementado
+- Verificar que no hay regresiones
+- Probar en diferentes breakpoints
+### 5.3 Iterar
+- Continuar hasta que no se encuentren errores
+- Documentar cualquier issue restante
+## RECURSOS DISPONIBLES:
+- Skills: sdd-explore, sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify
+- Engram para persistir memoria del proyecto
+- Herramientas: node --check, parsers de validación
+## ENTREGABLES:
+- Plan de acción numerado (PLAN_ACCION.md)
+- Archivos modificados con mejoras
+- Documentación de cambios realizados
+## NOTAS:
+- El orden de corrección debe ser: Crítico → Alto → Medio → Bajo
+- Mantener backwards compatibility
+- Verificar que cambios no rompan funcionalidad existente
+- Priorizar accesibilidad en todas las correcciones

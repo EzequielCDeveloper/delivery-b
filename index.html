@@ -30,7 +30,7 @@
           src="./assets/logo-delivery-b.svg"
           width="44"
           height="44"
-          alt=""
+          alt="RushEats"
           class="header-logo"
         />
         <h1>RushEats</h1>
@@ -45,7 +45,7 @@
             alt=""
             class="step-ico"
           />
-          Elegí local
+          Locales
         </span>
         <span class="step" data-step-indicator="2">
           <img
@@ -55,7 +55,7 @@
             alt=""
             class="step-ico"
           />
-          Tu menú
+          Menú
         </span>
         <span class="step subtle-step" data-step-indicator="3">
           <img
@@ -65,7 +65,7 @@
             alt=""
             class="step-ico"
           />
-          Revisar
+          Resumen
         </span>
       </div>
     </header>
@@ -74,9 +74,7 @@
       <!-- Paso 1: elegir restaurante (y filtro por categoría poco claro) -->
       <section id="step-restaurante" class="panel active">
         <h2>Locales cerca tuyo</h2>
-        <p class="muted">
-          Elegí un restaurante. El filtro de categoría solo ordena la lista.
-        </p>
+        <p class="muted">Elegí un local y filtrá por tipo de comida.</p>
         <div class="filtros">
           <label class="sr-only" for="filtro-cat">Categoría</label>
           <select id="filtro-cat" aria-label="Filtrar por tipo de comida">
@@ -87,19 +85,23 @@
           </select>
         </div>
         <ul id="lista-restaurantes" class="lista-cards"></ul>
+        <p id="rest-vacio" class="muted" hidden>
+          No hay locales disponibles para este filtro.
+        </p>
       </section>
 
       <!-- Paso 2: productos del restaurante elegido -->
       <section id="step-productos" class="panel" hidden>
-        <button type="button" class="link-back confusing" id="btn-volver-rest">
-          &larr; Cambiar sitio
+        <button type="button" class="link-back" id="btn-volver-rest">
+          &larr; Volver a locales
         </button>
         <h2 id="titulo-restaurante">Menú</h2>
         <ul id="lista-platos" class="lista-platos"></ul>
         <div class="sticky-cta">
           <!-- Botón resumen poco visible -->
           <button type="button" id="btn-carrito" class="btn btn-faint">
-            Ver resumen del pedido
+            <span>Ver resumen</span>
+            <span id="carrito-count" class="btn-badge" aria-live="polite">0</span>
           </button>
         </div>
       </section>
@@ -114,9 +116,13 @@
         <ul id="lista-resumen" class="lista-resumen"></ul>
         <p id="resumen-vacio" class="muted">Nada seleccionado.</p>
         <p class="total-line">
-          Total estimado: <strong id="total-delivery">0,00 €</strong>
+          Total estimado:
+          <strong id="total-delivery" aria-live="polite">0,00 €</strong>
         </p>
         <div class="actions">
+          <button type="button" class="btn btn-ghost-danger" id="btn-cancelar">
+            Cancelar pedido
+          </button>
           <button
             type="button"
             class="btn btn-ghost-small"
@@ -141,11 +147,47 @@
       <section id="step-confirmacion" class="panel panel-center" hidden>
         <h2>Pedido enviado</h2>
         <p id="msg-confirm">En breve recibirá el tiempo estimado.</p>
+        <div class="breakdown" aria-live="polite">
+          <div class="breakdown-row">
+            <span>Subtotal</span>
+            <strong id="confirm-subtotal">0,00 €</strong>
+          </div>
+          <div class="breakdown-row">
+            <span>Tarifa de envío</span>
+            <strong id="confirm-fee">0,00 €</strong>
+          </div>
+          <div class="breakdown-row">
+            <span>Impuestos</span>
+            <strong id="confirm-tax">0,00 €</strong>
+          </div>
+          <div class="breakdown-row total">
+            <span>Total</span>
+            <strong id="confirm-total">0,00 €</strong>
+          </div>
+        </div>
         <button type="button" class="btn btn-primary" id="btn-nuevo">
           Nuevo pedido
         </button>
       </section>
     </main>
+
+    <div class="modal" id="modal-cambio-rest" role="dialog" aria-modal="true" hidden>
+      <div class="modal-backdrop" data-close="true"></div>
+      <div class="modal-card" role="document">
+        <h3>¿Cambiar de local?</h3>
+        <p class="muted">
+          Si cambiás de restaurante se vaciará tu carrito actual.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost-small" id="modal-cancel">
+            Seguir en este local
+          </button>
+          <button type="button" class="btn btn-primary" id="modal-confirm">
+            Cambiar y vaciar
+          </button>
+        </div>
+      </div>
+    </div>
 
     <footer class="footer">
       <small>RushEats — variante B (A/B)</small>
